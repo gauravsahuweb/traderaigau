@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeGuru Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f0f17;--bg2:#161622;--bg3:#1e1e2e;--bg4:#252538;--bg5:#2e2e45;
+  --border:rgba(255,255,255,0.05);--border2:rgba(255,255,255,0.09);--border3:rgba(255,255,255,0.14);
+  --green:#10b981;--green2:rgba(16,185,129,.12);
+  --red:#f43f5e;--red2:rgba(244,63,94,.12);
+  --amber:#f59e0b;--amber2:rgba(245,158,11,.12);
+  --blue:#6366f1;--blue2:rgba(99,102,241,.12);
+  --purple:#a855f7;--purple2:rgba(168,85,247,.12);
+  --text:#e2e2ee;--muted:#52527a;--muted2:#7878a0;--muted3:#9898b8;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;font-size:13px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:4px}
+
+/* TOP NAV */
+.topnav{height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;z-index:100}
+.tn-left{display:flex;align-items:center;gap:24px}
+.brand{display:flex;align-items:center;gap:8px}
+.brand-logo{width:26px;height:26px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.brand-name{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.nav-items{display:flex;gap:2px}
+.nav-item{padding:5px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted2);transition:all .15s;border:none;background:none;font-family:'Inter',sans-serif}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--text);background:var(--bg3)}
+.tn-right{display:flex;align-items:center;gap:8px}
+.btn-upload{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all .2s}
+.btn-upload:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{display:flex;align-items:center;gap:5px;background:var(--bg3);color:var(--muted2);padding:6px 12px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);font-family:'Inter',sans-serif;transition:all .15s}
+.btn-outline:hover{color:var(--text);border-color:var(--border3)}
+#masterCSV{display:none}
+
+/* MAIN */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* VIEWS */
+.view{flex:1;overflow-y:auto;padding:20px;display:none}
+.view.active{display:block}
+.view-chat{flex:1;display:none;flex-direction:column;overflow:hidden}
+.view-chat.active{display:flex}
+
+/* ===== DASHBOARD ===== */
+.greeting{margin-bottom:18px}
+.greeting h2{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:3px}
+.greeting h2 em{color:var(--blue);font-style:normal}
+.greeting p{font-size:12px;color:var(--muted2)}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;transition:border-color .2s}
+.kpi:hover{border-color:var(--border2)}
+.kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.kpi-label{font-size:11px;color:var(--muted2);font-weight:500}
+.kpi-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.kpi-val{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:-.5px;line-height:1.1;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--muted2)}
+.kpi-badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;display:inline-block}
+.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}.blue{color:var(--blue)}.purple{color:var(--purple)}
+.bg-green{background:var(--green2)}.bg-red{background:var(--red2)}.bg-amber{background:var(--amber2)}.bg-blue{background:var(--blue2)}.bg-purple{background:var(--purple2)}
+
+/* STREAK ROW */
+.streak-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+.streak-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.streak-label{font-size:11px;color:var(--muted2);margin-bottom:6px;font-weight:500}
+.streak-val{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.streak-sub{font-size:11px;color:var(--muted2);margin-top:3px}
+
+/* BOTTOM GRID */
+.bottom-grid{display:grid;grid-template-columns:340px 1fr;gap:10px}
+
+/* SCORE CARD */
+.score-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.score-header{margin-bottom:12px}
+.score-title{font-size:11px;color:var(--muted2);font-weight:500;margin-bottom:4px}
+.score-num{font-size:36px;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--amber);letter-spacing:-1px}
+.score-trend{font-size:11px;margin-top:2px}
+.score-metrics{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.sm{display:flex;align-items:center;gap:8px}
+.sm-name{font-size:11px;color:var(--muted2);width:90px;flex-shrink:0}
+.sm-track{flex:1;height:5px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.sm-fill{height:100%;border-radius:99px;transition:width 1s ease}
+.sm-val{font-size:11px;font-weight:600;font-family:'JetBrains Mono',monospace;width:28px;text-align:right}
+
+/* ACTIVITY CARD */
+.activity-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.ac-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ac-title{font-size:12px;font-weight:600}
+.ac-legend{display:flex;gap:12px;font-size:11px;color:var(--muted2)}
+.leg{display:flex;align-items:center;gap:5px}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+.months-row{display:flex;gap:6px;margin-bottom:8px;font-size:10px;color:var(--muted);overflow-x:auto;padding-bottom:4px}
+.month-lbl{min-width:32px;text-align:center}
+.dots-area{display:flex;gap:2px;flex-wrap:wrap;min-height:60px;margin-bottom:12px}
+.tdot{width:11px;height:11px;border-radius:50%;cursor:pointer;transition:all .15s;flex-shrink:0}
+.tdot:hover{transform:scale(1.5);z-index:1}
+.ac-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:10px;border-top:1px solid var(--border)}
+.acs-val{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.acs-label{font-size:10px;color:var(--muted2);margin-top:2px}
+.acs-sub{font-size:11px;font-weight:600;margin-top:2px}
+
+/* WIN RATE BAR */
+.winrate-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:10px}
+.wr-title{font-size:11px;color:var(--muted2);margin-bottom:8px;font-weight:500}
+.wr-bar{height:8px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:6px}
+.wr-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--blue));border-radius:99px;transition:width 1s}
+.wr-labels{display:flex;justify-content:space-between;font-size:10px}
+.best-worst{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.bw-card{background:var(--bg3);border-radius:8px;padding:10px 12px}
+.bw-label{font-size:10px;color:var(--muted2);margin-bottom:3px}
+.bw-val{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace}
+
+/* NO DATA BANNER */
+.nodatabanner{background:var(--blue2);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;font-size:12px;color:#a5b4fc}
+.nodatabanner button{margin-left:auto;background:var(--blue);color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* ===== TRADES VIEW ===== */
+.trades-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.trades-title{font-size:16px;font-weight:700}
+.trades-count{font-size:12px;color:var(--muted2);background:var(--bg3);padding:4px 10px;border-radius:99px}
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+thead th{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;padding:10px 14px;border-bottom:1px solid var(--border);text-align:left;background:var(--bg3)}
+tbody td{padding:9px 14px;border-bottom:1px solid var(--border);font-size:12px;font-family:'JetBrains Mono',monospace}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--bg3)}
+.td-sym{font-weight:600;color:var(--text);font-family:'Inter',sans-serif}
+.td-buy{color:var(--green);font-weight:600}.td-sell{color:var(--red);font-weight:600}
+
+/* STATS VIEW */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-big{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.sb-label{font-size:11px;color:var(--muted2);margin-bottom:6px;font-weight:500}
+.sb-val{font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.sb-sub{font-size:11px;color:var(--muted2);margin-top:4px}
+.hour-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:3px}
+.hour-cell{border-radius:4px;height:28px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;cursor:pointer;transition:transform .1s}
+.hour-cell:hover{transform:scale(1.1)}
+.sym-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.sym-row:last-child{border-bottom:none}
+
+/* ===== CHAT VIEW ===== */
+.chat-main{flex:1;display:flex;overflow:hidden}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.chat-sidebar-panel{width:210px;border-left:1px solid var(--border);background:var(--bg2);padding:14px;overflow-y:auto;flex-shrink:0}
+.csp-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;margin-top:12px}
+.csp-label:first-child{margin-top:0}
+.qq{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--muted2);padding:7px 10px;border-radius:7px;font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;text-align:left;margin-bottom:4px;transition:all .14s;display:flex;align-items:center;gap:6px;line-height:1.3}
+.qq:hover{border-color:var(--blue);color:var(--text);background:var(--blue2)}
+.csp-stat{display:flex;justify-content:space-between;padding:4px 0;font-size:11px}
+.csp-sn{color:var(--muted2)}.csp-sv{font-weight:600;font-family:'JetBrains Mono',monospace}
+
+.msg{display:flex;gap:10px;animation:fu .2s ease}
+@keyframes fu{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.av{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.av.ai{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff}
+.av.user{background:var(--bg4);border:1px solid var(--border2);color:var(--muted2)}
+.bubble{max-width:70%;padding:11px 14px;font-size:13px;line-height:1.65;word-wrap:break-word}
+.msg.ai .bubble{background:var(--bg3);border:1px solid var(--border);border-radius:3px 10px 10px 10px}
+.msg.user .bubble{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-radius:10px 3px 10px 10px}
+.bubble strong{font-weight:700}
+.bubble .p{color:var(--green)}.bubble .l{color:var(--red)}.bubble .h{color:var(--amber)}
+.typing{display:flex;gap:4px;align-items:center}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--muted2);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.chat-welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:10px;padding:32px}
+.cw-icon{width:52px;height:52px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:6px}
+.cw-title{font-size:18px;font-weight:700}
+.cw-sub{font-size:13px;color:var(--muted2);max-width:320px;line-height:1.6}
+.cw-steps{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.cw-step{background:var(--bg3);border:1px solid var(--border2);padding:6px 12px;border-radius:99px;font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:5px}
+.step-n{width:16px;height:16px;background:var(--blue);color:#fff;border-radius:50%;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.chat-input-bar{padding:12px 20px 16px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.cib-row{display:flex;gap:8px;align-items:flex-end}
+.cib-wrap{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;padding:0 13px;transition:border-color .2s}
+.cib-wrap:focus-within{border-color:var(--blue)}
+#chatInp{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:11px 0;resize:none;max-height:120px}
+#chatInp::placeholder{color:var(--muted)}
+.send-btn{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--purple));border:none;border-radius:9px;cursor:pointer;color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.send-btn:hover{opacity:.9;transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.cib-hint{font-size:10px;color:var(--muted);margin-top:6px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <div class="tn-left">
+    <div class="brand">
+      <div class="brand-logo">TG</div>
+      <span class="brand-name">TradeGuru Pro</span>
+    </div>
+    <div class="nav-items">
+      <button class="nav-item active" onclick="showView('dashboard')">Dashboard</button>
+      <button class="nav-item" onclick="showView('trades')">Trades</button>
+      <button class="nav-item" onclick="showView('stats')">Statistics</button>
+      <button class="nav-item" onclick="showView('chat')">AI Chat</button>
+    </div>
+  </div>
+  <div class="tn-right">
+    <label class="btn-upload">
+      ⚡ Sync Trades
+      <input type="file" id="masterCSV" accept=".csv,.txt" onchange="handleCSV(this.files[0])">
+    </label>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- DASHBOARD VIEW -->
+  <div class="view active" id="vw-dashboard">
+    <div class="greeting">
+      <h2>Good evening, <em id="traderName">Trader</em></h2>
+      <p id="greetSub">Here's your trading performance overview</p>
+    </div>
+
+    <div id="noBanner" class="nodatabanner">
+      <span>⚡</span>
+      <span>No data loaded — Click "Sync Trades" to upload any broker CSV (Myfxbook, MT4, MT5, Exness, Binance, etc.)</span>
+      <button onclick="document.getElementById('masterCSV').click()">Upload CSV</button>
+    </div>
+
+    <!-- KPI ROW -->
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-top"><span class="kpi-label">Today</span><div class="kpi-icon bg-red">📉</div></div>
+        <div class="kpi-val" id="k-today" style="color:var(--red)">--</div>
+        <div class="kpi-sub" id="k-today-date">--</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top"><span class="kpi-label">Current Balance</span><div class="kpi-icon bg-blue">💰</div></div>
+        <div class="kpi-val blue" id="k-balance">--</div>
+        <div class="kpi-sub">Broker account</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top"><span class="kpi-label">Total P&amp;L</span><div class="kpi-icon bg-green">📈</div></div>
+        <div class="kpi-val" id="k-total-pl">--</div>
+        <div class="kpi-sub" id="k-total-sub">-- trades · -- win rate</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top"><span class="kpi-label">This Month</span><div class="kpi-icon bg-purple">🗓️</div></div>
+        <div class="kpi-val" id="k-month-pl">--</div>
+        <div class="kpi-sub" id="k-month-sub">-- trades this month</div>
+      </div>
+    </div>
+
+    <!-- STREAK ROW -->
+    <div class="streak-row">
+      <div class="streak-card">
+        <div class="streak-label">Streak</div>
+        <div class="streak-val" id="s-streak">--</div>
+        <div class="streak-sub" id="s-streak-sub">--</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-label">Biggest Win 🏆</div>
+        <div class="streak-val green" id="s-bigwin">--</div>
+        <div class="streak-sub">Single trade</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-label">Biggest Loss 💀</div>
+        <div class="streak-val red" id="s-bigloss">--</div>
+        <div class="streak-sub">Single trade</div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-label">Best Day 🌟</div>
+        <div class="streak-val green" id="s-bestday">--</div>
+        <div class="streak-sub" id="s-bestday-date">--</div>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="bottom-grid">
+      <!-- TRADE SCORE -->
+      <div>
+        <div class="score-card">
+          <div class="score-header">
+            <div class="score-title">Trade Score</div>
+            <div class="score-num" id="sc-num">--</div>
+            <div class="score-trend" id="sc-trend" style="color:var(--muted2)">Upload CSV to calculate</div>
+          </div>
+          <div class="score-metrics" id="sc-metrics">
+            <div style="font-size:12px;color:var(--muted);text-align:center;padding:12px 0">No data</div>
+          </div>
+        </div>
+        <div class="winrate-card">
+          <div class="wr-title">Daily Win Rate</div>
+          <div class="wr-bar"><div class="wr-fill" id="wr-fill" style="width:0%"></div></div>
+          <div class="wr-labels">
+            <span id="wr-pct" class="green">0%</span>
+            <span style="color:var(--muted2)">100%</span>
+          </div>
+          <div class="best-worst">
+            <div class="bw-card">
+              <div class="bw-label">Best Day</div>
+              <div class="bw-val green" id="bw-best">--</div>
+            </div>
+            <div class="bw-card">
+              <div class="bw-label">Worst Day</div>
+              <div class="bw-val red" id="bw-worst">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY -->
+      <div class="activity-card">
+        <div class="ac-header">
+          <span class="ac-title">Trading Activity</span>
+          <div class="ac-legend">
+            <div class="leg"><div class="leg-dot" style="background:var(--red)"></div>Loss</div>
+            <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Profit</div>
+          </div>
+        </div>
+        <div class="dots-area" id="ac-dots">
+          <div style="font-size:12px;color:var(--muted);padding:20px 0">Upload CSV to see activity</div>
+        </div>
+        <div class="ac-stats">
+          <div><div class="acs-val" id="ac-days">--</div><div class="acs-label">Days Traded</div></div>
+          <div><div class="acs-val green" id="ac-green">--</div><div class="acs-label">Green Days</div><div class="acs-sub green" id="ac-streak">--</div></div>
+          <div>
+            <div style="display:flex;gap:16px">
+              <div><div class="acs-val red" id="ac-red">--</div><div class="acs-label">Red Days</div></div>
+              <div><div class="acs-val amber" id="ac-pf">--</div><div class="acs-label">Profit Factor</div></div>
+            </div>
+            <div style="margin-top:6px;font-size:11px;color:var(--muted2)" id="ac-total-pl">Total P&amp;L: --</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADES VIEW -->
+  <div class="view" id="vw-trades">
+    <div class="trades-header">
+      <div class="trades-title">All Trades</div>
+      <div class="trades-count" id="tc-count">0 trades</div>
+    </div>
+    <div class="table-wrap" id="trades-table-wrap">
+      <div style="text-align:center;padding:48px;color:var(--muted2)">Upload CSV — trades will appear here</div>
+    </div>
+  </div>
+
+  <!-- STATS VIEW -->
+  <div class="view" id="vw-stats">
+    <div class="trades-title" style="margin-bottom:14px">Detailed Statistics</div>
+    <div class="stats-grid" id="stats-grid">
+      <div style="text-align:center;padding:32px;color:var(--muted2);grid-column:1/-1">Upload CSV to see statistics</div>
+    </div>
+    <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em">Hourly Performance (IST)</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:16px">
+      <div class="hour-grid" id="hour-grid"><div style="color:var(--muted);font-size:12px;grid-column:1/-1;padding:16px 0;text-align:center">Upload CSV</div></div>
+    </div>
+    <div style="margin-bottom:10px;font-size:12px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em">Symbol Performance</div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px" id="sym-perf">
+      <div style="color:var(--muted);font-size:12px;text-align:center;padding:16px 0">Upload CSV</div>
+    </div>
+  </div>
+
+  <!-- CHAT VIEW -->
+  <div class="view-chat" id="vw-chat">
+    <div class="chat-main">
+      <div class="chat-messages" id="chatMsgs">
+        <div class="chat-welcome" id="chatWelcome">
+          <div class="cw-icon">🤖</div>
+          <div class="cw-title">TradeGuru AI</div>
+          <div class="cw-sub">Your personal trading analyst. Upload any CSV and ask anything — brutally honest answers!</div>
+          <div class="cw-steps">
+            <div class="cw-step"><div class="step-n">1</div>Upload CSV</div>
+            <div class="cw-step"><div class="step-n">2</div>Stats load</div>
+            <div class="cw-step"><div class="step-n">3</div>Ask anything!</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-sidebar-panel">
+        <div class="csp-label">Quick Questions</div>
+        <button class="qq" onclick="qask('Best trade kaunsa tha?')">🏆 Best trade</button>
+        <button class="qq" onclick="qask('Worst trade dissect karo.')">💀 Worst trade</button>
+        <button class="qq" onclick="qask('Kab trade karna chahiye? Best session?')">⏰ Best session</button>
+        <button class="qq" onclick="qask('Emotional trading check karo.')">🧠 Emotional?</button>
+        <button class="qq" onclick="qask('Risk management kaisa hai?')">🎯 Risk check</button>
+        <button class="qq" onclick="qask('Prop firm ready hun?')">🏦 Prop firm</button>
+        <button class="qq" onclick="qask('30-day improvement roadmap do.')">🗺️ Roadmap</button>
+        <button class="qq" onclick="qask('Overall trader rating 10 mein?')">⭐ Rating</button>
+        <button class="qq" onclick="qask('Kaunsa symbol avoid karun?')">⚠️ Avoid?</button>
+        <button class="qq" onclick="qask('Sabse badi weakness kya hai?')">🔍 Weakness</button>
+        <div class="csp-label">Account Stats</div>
+        <div id="chat-stats-panel"><div style="font-size:11px;color:var(--muted)">Upload CSV first</div></div>
+      </div>
+    </div>
+    <div class="chat-input-bar">
+      <div class="cib-row">
+        <div class="cib-wrap">
+          <textarea id="chatInp" rows="1" placeholder="Ask anything about your trading..."></textarea>
+        </div>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()">➤</button>
+      </div>
+      <div class="cib-hint">Enter = send · Shift+Enter = new line</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let D = null; // trade data
+let CH = [];  // chat history
+
+const INR = n => {
+  const abs = Math.abs(Math.round(n));
+  const s = abs.toLocaleString('en-IN');
+  return (n < 0 ? '-' : '') + '₹' + s;
+};
+
+const USD = n => {
+  const abs = Math.abs(n).toFixed(2);
+  return (n < 0 ? '-$' : '$') + parseFloat(abs).toLocaleString('en-US');
+};
+
+// auto-detect currency
+let isCrypto = false;
+let currency = 'INR';
+
+const fmt = n => currency === 'USD' ? USD(n) : INR(n);
+
+// ============================================================
+// UNIVERSAL CSV PARSER — supports Myfxbook, MT4/MT5, generic
+// ============================================================
+function handleCSV(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => parseUniversal(e.target.result, file.name);
+  reader.readAsText(file);
+}
+
+function parseUniversal(text, filename) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (!lines.length) return alert('Empty file!');
+
+  // Detect delimiter
+  const delim = lines[0].includes('\t') ? '\t' : ',';
+  const cols = lines[0].split(delim).map(c => c.replace(/"/g,'').trim().toLowerCase());
+
+  // Try to find column indices flexibly
+  const find = (...keys) => {
+    for (const k of keys) {
+      const i = cols.findIndex(c => c.includes(k));
+      if (i >= 0) return i;
+    }
+    return -1;
+  };
+
+  const iAction   = find('type','action','side','direction');
+  const iSymbol   = find('symbol','pair','instrument','asset','market');
+  const iLots     = find('lots','volume','size','qty','quantity');
+  const iOpenD    = find('open time','open date','opendate','open','entry time','date');
+  const iCloseD   = find('close time','close date','closedate','exit time');
+  const iOpenP    = find('open price','entry price','openprice','open_price','entry');
+  const iCloseP   = find('close price','exit price','closeprice','close_price','exit');
+  const iPips     = find('pips','points');
+  const iProfit   = find('profit','p&l','pnl','realized','net');
+
+  let trades = [], deps = 0, wds = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const c = lines[i].split(delim).map(x => x.replace(/"/g,'').trim());
+    if (c.length < 3) continue;
+
+    const action = iAction >= 0 ? c[iAction] : '';
+    const actLow = action.toLowerCase();
+
+    // Skip non-trade rows
+    if (actLow === 'deposit' || actLow === 'withdrawal' || actLow === 'balance' || actLow === 'credit') {
+      const amt = parseFloat(c[c.length-1]);
+      if (!isNaN(amt)) {
+        if (actLow === 'deposit' && amt > 0) deps += amt;
+        if (actLow === 'withdrawal') wds += Math.abs(amt);
+      }
+      continue;
+    }
+
+    // Find profit - try last numeric column if not found
+    let profit = iProfit >= 0 ? parseFloat(c[iProfit]) : NaN;
+    if (isNaN(profit)) {
+      // scan from right
+      for (let j = c.length - 1; j >= 0; j--) {
+        const v = parseFloat(c[j]);
+        if (!isNaN(v) && Math.abs(v) < 1000000) { profit = v; break; }
+      }
+    }
+    if (isNaN(profit)) continue;
+    if (actLow !== 'buy' && actLow !== 'sell' && actLow !== 'long' && actLow !== 'short' && iAction < 0) {
+      // If no action column just accept it
+    } else if (actLow && actLow !== 'buy' && actLow !== 'sell' && actLow !== 'long' && actLow !== 'short') {
+      continue;
+    }
+
+    trades.push({
+      action: actLow.includes('sell')||actLow.includes('short') ? 'Sell' : 'Buy',
+      symbol: iSymbol >= 0 ? c[iSymbol] : 'UNKNOWN',
+      lots:   iLots   >= 0 ? (parseFloat(c[iLots])||0) : 0,
+      openDate:  iOpenD  >= 0 ? c[iOpenD]  : (c[0]||''),
+      closeDate: iCloseD >= 0 ? c[iCloseD] : (c[1]||''),
+      openPrice:  iOpenP  >= 0 ? parseFloat(c[iOpenP])||0  : 0,
+      closePrice: iCloseP >= 0 ? parseFloat(c[iCloseP])||0 : 0,
+      pips:    iPips >= 0 ? parseFloat(c[iPips])||0 : 0,
+      profit
+    });
+  }
+
+  if (!trades.length) {
+    // Fallback: myfxbook PDF-extracted style (space-separated)
+    return parseMyfxbookStyle(text, filename);
+  }
+
+  // Detect currency
+  currency = deps > 1000 ? 'INR' : 'USD';
+  if (filename.toLowerCase().includes('inr')) currency = 'INR';
+
+  processData(trades, deps, wds, filename);
+}
+
+function parseMyfxbookStyle(text, filename) {
+  // For Myfxbook CSV where columns may be different
+  const lines = text.split(/\r?\n/);
+  let trades = [], deps = 0, wds = 0;
+
+  for (const line of lines) {
+    const c = line.split(',').map(x => x.replace(/"/g,'').trim());
+    if (c.length < 6) continue;
+    const act = (c[3]||'').toLowerCase();
+    const profit = parseFloat(c[c.length-1]);
+    if ((act==='buy'||act==='sell') && !isNaN(profit)) {
+      trades.push({
+        openDate:c[0], closeDate:c[1], symbol:c[2],
+        action: act==='buy'?'Buy':'Sell',
+        lots:parseFloat(c[4])||0,
+        openPrice:parseFloat(c[7])||0,
+        closePrice:parseFloat(c[8])||0,
+        pips:parseFloat(c[9])||0, profit
+      });
+    }
+    if (act==='deposit' && !isNaN(profit) && profit>0) deps+=profit;
+    if (act==='withdrawal' && !isNaN(profit)) wds+=Math.abs(profit);
+  }
+
+  if (!trades.length) { alert('Could not parse CSV. Try exporting from Myfxbook → History → Export.'); return; }
+  currency = deps > 500 ? 'INR' : 'USD';
+  processData(trades, deps, wds, filename);
+}
+
+function processData(trades, deps, wds, filename) {
+  const wins   = trades.filter(t=>t.profit>0);
+  const losses = trades.filter(t=>t.profit<0);
+  const totalP = trades.reduce((s,t)=>s+t.profit,0);
+  const winRate = trades.length ? ((wins.length/trades.length)*100).toFixed(1) : 0;
+  const bigWin  = trades.length ? Math.max(...trades.map(t=>t.profit)) : 0;
+  const bigLoss = trades.length ? Math.min(...trades.map(t=>t.profit)) : 0;
+  const avgWin  = wins.length ? wins.reduce((s,t)=>s+t.profit,0)/wins.length : 0;
+  const avgLoss = losses.length ? Math.abs(losses.reduce((s,t)=>s+t.profit,0)/losses.length) : 0;
+  const pf      = avgLoss > 0 ? (avgWin/avgLoss).toFixed(2) : 'N/A';
+
+  // Day map
+  const dayMap = {};
+  trades.forEach(t => {
+    const d = (t.openDate||'').split(' ')[0] || (t.openDate||'').split('T')[0];
+    if (!d || d.length < 6) return;
+    if (!dayMap[d]) dayMap[d] = 0;
+    dayMap[d] += t.profit;
+  });
+  const days = Object.entries(dayMap);
+  const greenDays = days.filter(d=>d[1]>0).length;
+  const redDays   = days.filter(d=>d[1]<0).length;
+  const sortedDays = [...days].sort((a,b)=>b[1]-a[1]);
+  const bestDayEntry  = sortedDays[0];
+  const worstDayEntry = sortedDays[sortedDays.length-1];
+
+  // Current streak
+  const sortedDayKeys = days.map(d=>d[0]).sort();
+  let streak = 0, lastSign = 0;
+  for (let i = sortedDayKeys.length-1; i >= 0; i--) {
+    const s = dayMap[sortedDayKeys[i]] >= 0 ? 1 : -1;
+    if (i === sortedDayKeys.length-1) { lastSign=s; streak=1; }
+    else if (s === lastSign) streak++;
+    else break;
+  }
+
+  // Hour map
+  const hourMap = {};
+  for (let h=0;h<24;h++) hourMap[h]={profit:0,count:0};
+  trades.forEach(t => {
+    const dt = t.openDate||'';
+    const timePart = dt.includes('T') ? dt.split('T')[1] : dt.split(' ')[1];
+    const h = timePart ? parseInt(timePart.split(':')[0])||0 : 0;
+    hourMap[h].profit += t.profit;
+    hourMap[h].count++;
+  });
+  const bestHour  = Object.entries(hourMap).sort((a,b)=>b[1].profit-a[1].profit)[0];
+  const worstHour = Object.entries(hourMap).sort((a,b)=>a[1].profit-b[1].profit)[0];
+
+  // Symbol map
+  const symMap = {};
+  trades.forEach(t => {
+    const s = t.symbol||'UNKNOWN';
+    if (!symMap[s]) symMap[s]={profit:0,count:0,wins:0,losses:0};
+    symMap[s].profit+=t.profit; symMap[s].count++;
+    if (t.profit>0) symMap[s].wins++; else symMap[s].losses++;
+  });
+  const bestSym  = Object.entries(symMap).sort((a,b)=>b[1].profit-a[1].profit)[0];
+  const worstSym = Object.entries(symMap).sort((a,b)=>a[1].profit-b[1].profit)[0];
+
+  // Month
+  const now = new Date();
+  const monthTrades = trades.filter(t => {
+    const d = new Date(t.openDate);
+    return !isNaN(d) && d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  });
+  const monthPL = monthTrades.reduce((s,t)=>s+t.profit,0);
+
+  // Score
+  const rrScore   = avgLoss>0 ? Math.min(100,(avgWin/avgLoss)*50) : 0;
+  const wrScore   = Math.min(100, parseFloat(winRate)*1.4);
+  const consScore = days.length ? Math.min(100,(greenDays/days.length)*100) : 0;
+  const pfScore   = pf!=='N/A' ? Math.min(100,parseFloat(pf)*40) : 0;
+  const score     = Math.round((rrScore+wrScore+consScore+pfScore)/4);
+
+  // Trader name from filename
+  const tname = filename.replace(/\.[^.]+$/,'').replace(/_/g,' ').split(' ')[0];
+
+  D = {
+    filename, trades, wins:wins.length, losses:losses.length,
+    totalP, winRate, bigWin, bigLoss, avgWin, avgLoss, pf,
+    deps, wds, dayMap, greenDays, redDays, bestDayEntry, worstDayEntry,
+    streak, lastSign, hourMap, symMap, bestHour, worstHour,
+    bestSym, worstSym, monthPL, monthTrades:monthTrades.length,
+    rrScore, wrScore, consScore, pfScore, score,
+    symbols: Object.keys(symMap)
+  };
+
+  renderDashboard();
+  renderTrades();
+  renderStats();
+  renderChatStats();
+  document.getElementById('noBanner').style.display = 'none';
+  document.getElementById('traderName').textContent = tname.charAt(0).toUpperCase()+tname.slice(1);
+
+  // Switch to dashboard
+  showView('dashboard');
+
+  // Chat notification
+  addBubble('ai', `<strong>✅ ${trades.length} trades loaded!</strong><br>
+Win Rate: <span class="${parseFloat(winRate)>=50?'p':'l'}">${winRate}%</span> &nbsp;|&nbsp;
+Net P&L: <span class="${totalP>=0?'p':'l'}">${fmt(totalP)}</span> &nbsp;|&nbsp;
+Score: <span class="h">${score}/100</span><br><br>
+Go to <strong>AI Chat</strong> tab and ask me anything! 🔥`);
+}
+
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+function renderDashboard() {
+  const d = D;
+  const now = new Date();
+  const today = now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+
+  // Today = last trading day P&L
+  const sortedDays = Object.entries(d.dayMap).sort((a,b)=>a[0].localeCompare(b[0]));
+  const lastDayPL = sortedDays.length ? sortedDays[sortedDays.length-1][1] : 0;
+
+  set('k-today', fmt(lastDayPL), lastDayPL>=0?'green':'red');
+  set('k-today-date', today);
+  set('k-balance', fmt(d.deps - d.wds + d.totalP), 'blue');
+  set('k-total-pl', fmt(d.totalP), d.totalP>=0?'green':'red');
+  document.getElementById('k-total-sub').textContent = `${d.trades.length} trades · ${d.winRate}% win rate`;
+  set('k-month-pl', fmt(d.monthPL), d.monthPL>=0?'green':'red');
+  document.getElementById('k-month-sub').textContent = `${d.monthTrades} trades this month`;
+
+  // Streak
+  const streakSign = d.lastSign >= 0 ? '🟢' : '🔴';
+  document.getElementById('s-streak').textContent = d.streak;
+  document.getElementById('s-streak-sub').textContent = d.lastSign>=0 ? 'wins' : 'losses';
+  set('s-bigwin', '+' + fmt(d.bigWin), 'green');
+  set('s-bigloss', '-' + fmt(Math.abs(d.bigLoss)), 'red');
+  if (d.bestDayEntry) {
+    set('s-bestday', '+' + fmt(d.bestDayEntry[1]), 'green');
+    document.getElementById('s-bestday-date').textContent = d.bestDayEntry[0];
+  }
+
+  // Score
+  document.getElementById('sc-num').textContent = d.score;
+  document.getElementById('sc-num').style.color = d.score>=60?'var(--green)':d.score>=40?'var(--amber)':'var(--red)';
+  document.getElementById('sc-trend').textContent = d.score>=60?'↑ Improving':d.score>=40?'→ Stable':'↓ Needs work';
+  document.getElementById('sc-trend').style.color = d.score>=60?'var(--green)':d.score>=40?'var(--amber)':'var(--red)';
+
+  const metrics = [
+    {n:'Win Rate',v:d.wrScore,c:'var(--green)'},
+    {n:'Risk/Reward',v:d.rrScore,c:'var(--blue)'},
+    {n:'Consistency',v:d.consScore,c:'var(--purple)'},
+    {n:'Profit Factor',v:d.pfScore,c:'var(--amber)'},
+  ];
+  document.getElementById('sc-metrics').innerHTML = metrics.map(m=>`
+    <div class="sm">
+      <span class="sm-name">${m.n}</span>
+      <div class="sm-track"><div class="sm-fill" style="width:${m.v.toFixed(0)}%;background:${m.c}"></div></div>
+      <span class="sm-val" style="color:${m.c}">${m.v.toFixed(0)}</span>
+    </div>`).join('');
+
+  // Win rate bar
+  const wr = parseFloat(d.winRate);
+  document.getElementById('wr-fill').style.width = wr + '%';
+  document.getElementById('wr-pct').textContent = wr + '%';
+  document.getElementById('wr-pct').style.color = wr>=50?'var(--green)':'var(--red)';
+  if (d.bestDayEntry)  document.getElementById('bw-best').textContent  = '+' + fmt(d.bestDayEntry[1]);
+  if (d.worstDayEntry) document.getElementById('bw-worst').textContent = '-' + fmt(Math.abs(d.worstDayEntry[1]));
+
+  // Dots
+  const dotHTML = d.trades.slice(-80).map(t =>
+    `<div class="tdot ${t.profit>=0?'win':'loss'}" style="background:${t.profit>=0?'var(--green)':'var(--red)'}" title="${t.symbol} ${t.action}: ${fmt(t.profit)}"></div>`
+  ).join('');
+  document.getElementById('ac-dots').innerHTML = dotHTML || '<div style="color:var(--muted);font-size:12px">No trades</div>';
+
+  const totalDays = Object.keys(d.dayMap).length;
+  document.getElementById('ac-days').textContent  = totalDays;
+  document.getElementById('ac-green').textContent = d.greenDays;
+  document.getElementById('ac-red').textContent   = d.redDays;
+  document.getElementById('ac-pf').textContent    = d.pf;
+  document.getElementById('ac-streak').textContent = 'Longest streak';
+  document.getElementById('ac-total-pl').textContent = 'Total P&L: ' + fmt(d.totalP);
+
+  document.getElementById('greetSub').textContent = "Here's your trading performance overview";
+}
+
+function renderTrades() {
+  const rows = D.trades.slice().reverse().slice(0,200).map(t=>`
+    <tr>
+      <td class="td-sym">${t.symbol}</td>
+      <td class="${t.action==='Buy'?'td-buy':'td-sell'}">${t.action}</td>
+      <td>${t.lots||'--'}</td>
+      <td style="color:var(--muted2)">${t.openDate||'--'}</td>
+      <td style="color:var(--muted2)">${t.closeDate||'--'}</td>
+      <td style="color:${t.openPrice?'var(--text)':'var(--muted)'}">${t.openPrice||'--'}</td>
+      <td style="color:${t.closePrice?'var(--text)':'var(--muted)'}">${t.closePrice||'--'}</td>
+      <td style="color:${t.pips>=0?'var(--green)':'var(--red)'}">${t.pips?.toFixed(1)||'--'}</td>
+      <td style="color:${t.profit>=0?'var(--green)':'var(--red)'};font-weight:600">${fmt(t.profit)}</td>
+    </tr>`).join('');
+
+  document.getElementById('trades-table-wrap').innerHTML = `
+    <table>
+      <thead><tr><th>Symbol</th><th>Type</th><th>Lots</th><th>Open</th><th>Close</th><th>Open Price</th><th>Close Price</th><th>Pips</th><th>P&L</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  document.getElementById('tc-count').textContent = D.trades.length + ' trades';
+}
+
+function renderStats() {
+  const d = D;
+  const rr = d.avgLoss>0?(d.avgWin/d.avgLoss).toFixed(2):'N/A';
+
+  document.getElementById('stats-grid').innerHTML = [
+    {l:'Total Trades',v:d.trades.length,s:`${d.wins}W / ${d.losses}L`,c:'blue'},
+    {l:'Win Rate',v:d.winRate+'%',s:'of trades profitable',c:parseFloat(d.winRate)>=50?'green':'red'},
+    {l:'Net P&L',v:fmt(d.totalP),s:`Deposits: ${fmt(d.deps)}`,c:d.totalP>=0?'green':'red'},
+    {l:'Avg Win',v:'+'+fmt(d.avgWin),s:'per winning trade',c:'green'},
+    {l:'Avg Loss',v:'-'+fmt(d.avgLoss),s:'per losing trade',c:'red'},
+    {l:'Risk/Reward',v:rr,s:'avg win / avg loss',c:parseFloat(rr)>=1?'green':'red'},
+    {l:'Profit Factor',v:d.pf,s:'gross profit / gross loss',c:parseFloat(d.pf)>=1?'green':'amber'},
+    {l:'Best Trade',v:'+'+fmt(d.bigWin),s:'single trade',c:'green'},
+    {l:'Worst Trade',v:'-'+fmt(Math.abs(d.bigLoss)),s:'single trade',c:'red'},
+  ].map(i=>`
+    <div class="stat-big">
+      <div class="sb-label">${i.l}</div>
+      <div class="sb-val ${i.c}">${i.v}</div>
+      <div class="sb-sub">${i.s}</div>
+    </div>`).join('');
+
+  // Hour grid
+  const maxAbs = Math.max(...Object.values(d.hourMap).map(h=>Math.abs(h.profit)))||1;
+  document.getElementById('hour-grid').innerHTML = Object.entries(d.hourMap).map(([h,v])=>{
+    const intensity = Math.round((Math.abs(v.profit)/maxAbs)*255);
+    const bg = v.profit>=0 ? `rgba(16,185,129,${intensity/255*0.8+0.1})` : `rgba(244,63,94,${intensity/255*0.8+0.1})`;
+    return `<div class="hour-cell" style="background:${bg};color:${v.profit>=0?'var(--green)':'var(--red)'}" title="${h}:00 → ${fmt(v.profit)} (${v.count} trades)">${h}</div>`;
+  }).join('');
+
+  // Symbol performance
+  document.getElementById('sym-perf').innerHTML = Object.entries(d.symMap)
+    .sort((a,b)=>b[1].profit-a[1].profit)
+    .map(([sym,v])=>{
+      const wr = v.count>0?((v.wins/v.count)*100).toFixed(0):0;
+      return `<div class="sym-row">
+        <span style="font-weight:600;width:80px">${sym}</span>
+        <span style="color:var(--muted2);font-size:11px">${v.count} trades · ${wr}% win</span>
+        <div style="flex:1;margin:0 12px;height:4px;background:var(--bg4);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${Math.min(100,Math.abs(v.profit)/Math.max(...Object.values(d.symMap).map(x=>Math.abs(x.profit)))*100)}%;background:${v.profit>=0?'var(--green)':'var(--red)'};border-radius:99px"></div>
+        </div>
+        <span style="font-family:'JetBrains Mono';font-size:12px;font-weight:600;color:${v.profit>=0?'var(--green)':'var(--red)'}">${fmt(v.profit)}</span>
+      </div>`;
+    }).join('');
+}
+
+function renderChatStats() {
+  const d = D;
+  document.getElementById('chat-stats-panel').innerHTML = `
+    <div class="csp-stat"><span class="csp-sn">Trades</span><span class="csp-sv">${d.trades.length}</span></div>
+    <div class="csp-stat"><span class="csp-sn">Win Rate</span><span class="csp-sv" style="color:${parseFloat(d.winRate)>=50?'var(--green)':'var(--red)'}">${d.winRate}%</span></div>
+    <div class="csp-stat"><span class="csp-sn">Net P&L</span><span class="csp-sv" style="color:${d.totalP>=0?'var(--green)':'var(--red)'}">${fmt(d.totalP)}</span></div>
+    <div class="csp-stat"><span class="csp-sn">Score</span><span class="csp-sv" style="color:var(--amber)">${d.score}/100</span></div>
+    <div class="csp-stat"><span class="csp-sn">Best</span><span class="csp-sv green">+${fmt(d.bigWin)}</span></div>
+    <div class="csp-stat"><span class="csp-sn">Worst</span><span class="csp-sv red">-${fmt(Math.abs(d.bigLoss))}</span></div>`;
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function set(id, val, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  el.className = el.className.replace(/\b(green|red|blue|amber|purple)\b/g,'').trim();
+  if (cls) el.classList.add(cls);
+}
+
+// ============================================================
+// VIEW SWITCHING
+// ============================================================
+function showView(v) {
+  ['dashboard','trades','stats','chat'].forEach((n,i) => {
+    const chat = n==='chat';
+    const el = document.getElementById('vw-'+n);
+    if (chat) { el.classList.remove('active'); el.style.display='none'; }
+    else { el.classList.remove('active'); }
+    document.querySelectorAll('.nav-item')[i]?.classList.remove('active');
+  });
+  const el = document.getElementById('vw-'+v);
+  if (v==='chat') { el.classList.add('active'); el.style.display='flex'; }
+  else el.classList.add('active');
+  const idx = ['dashboard','trades','stats','chat'].indexOf(v);
+  document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+function qask(q) { document.getElementById('chatInp').value = q; sendMsg(); }
+
+async function sendMsg() {
+  const inp = document.getElementById('chatInp');
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value = ''; inp.style.height='auto';
+  document.getElementById('chatWelcome')?.remove();
+  addBubble('user', msg);
+  CH.push({role:'user',content:msg});
+  const tid = addTyping();
+  document.getElementById('sendBtn').disabled = true;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:buildSys(),messages:CH})
+    });
+    removeTyping(tid);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    const reply = data.content.map(b=>b.type==='text'?b.text:'').join('');
+    CH.push({role:'assistant',content:reply});
+    addBubble('ai', fmtMd(reply));
+  } catch {
+    removeTyping(tid);
+    const r = localReply(msg);
+    CH.push({role:'assistant',content:r});
+    addBubble('ai', fmtMd(r));
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function buildSys() {
+  let s = `Tu "TradeGuru AI" hai — brutal honest trading analyst. Hindi mein baat kar. Senior trader tone — strict, direct, caring. Max 180 words. Use <strong> for bold.`;
+  if (D) {
+    const rr = D.avgLoss>0?(D.avgWin/D.avgLoss).toFixed(2):'N/A';
+    s += `\n\nTrader data:\nTrades:${D.trades.length}|Wins:${D.wins}|Losses:${D.losses}|WinRate:${D.winRate}%|NetPL:${fmt(D.totalP)}|BestTrade:+${fmt(D.bigWin)}|WorstTrade:-${fmt(Math.abs(D.bigLoss))}|AvgWin:${fmt(D.avgWin)}|AvgLoss:${fmt(D.avgLoss)}|RR:${rr}|PF:${D.pf}|Score:${D.score}/100|Symbols:${D.symbols.join(',')}|BestHour:${D.bestHour?D.bestHour[0]+':00':'?'}|WorstHour:${D.worstHour?D.worstHour[0]+':00':'?'}|GreenDays:${D.greenDays}|RedDays:${D.redDays}`;
+  } else {
+    s += `\nNo CSV yet. Encourage to upload. Give general trading advice.`;
+  }
+  return s;
+}
+
+function localReply(msg) {
+  if (!D) return `Bhai pehle <strong>Sync Trades</strong> button se CSV upload kar — phir main specific analysis dunga!`;
+  const m = msg.toLowerCase();
+  if (m.includes('best trade')) return `Best trade: <strong class="p">+${fmt(D.bigWin)}</strong>. Ye trade mein patience tha — <strong>yehi teri real skill hai.</strong>`;
+  if (m.includes('worst')) return `Worst trade: <strong class="l">-${fmt(Math.abs(D.bigLoss))}</strong>. Bhai ye emotional tha — <strong>ek trade ne bahut nuqsan kiya.</strong>`;
+  if (m.includes('rating')||m.includes('score')) return `Score: <span class="h">${D.score}/100</span>. ${D.score>=60?'Decent — improve karo.':'Kafi kaam baaki hai bhai. Risk management pehle.'}`;
+  if (m.includes('session')||m.includes('kab')) return `Best hour: <strong>${D.bestHour?D.bestHour[0]+':00–'+(parseInt(D.bestHour[0])+2)+':00':'7–10 AM'}</strong>. Baaki time avoid karo.`;
+  return `Specific pooch — best/worst trade, session, risk, ya roadmap. Main hun yahan! 💪`;
+}
+
+function fmtMd(t) {
+  return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+}
+
+function addBubble(type, html) {
+  const c = document.getElementById('chatMsgs');
+  const d = document.createElement('div');
+  d.className = `msg ${type}`;
+  const av = type==='ai'?'<div class="av ai">AI</div>':'<div class="av user">G</div>';
+  d.innerHTML = `${type==='ai'?av:''}<div class="bubble">${html}</div>${type==='user'?av:''}`;
+  c.appendChild(d); c.scrollTop=c.scrollHeight;
+}
+
+let tc=0;
+function addTyping(){
+  const id=++tc,c=document.getElementById('chatMsgs'),d=document.createElement('div');
+  d.className='msg ai';d.id='t'+id;
+  d.innerHTML=`<div class="av ai">AI</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;return id;
+}
+function removeTyping(id){document.getElementById('t'+id)?.remove();}
+
+document.getElementById('chatInp').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+  setTimeout(()=>{this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';},0);
+});
+
+// Init
+setTimeout(()=>addBubble('ai',`<strong>Welcome to TradeGuru Pro! 🚀</strong><br>Click <strong>Sync Trades</strong> to upload your CSV — works with <strong>Myfxbook, MT4, MT5, Exness, Binance</strong>, and most brokers. Then ask me anything!`),300);
+</script>
+</body>
+</html>
